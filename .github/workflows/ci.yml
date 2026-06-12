@@ -1,0 +1,17 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: docker compose build
+
+      - run: docker compose run --rm composer install --working-dir=admin
+      - run: docker compose run --rm composer install --working-dir=redirect
+
+      - run: docker compose up -d
+
+      - run: docker compose run --rm admin php vendor/bin/phpunit --coverage-text
+      - run: docker compose run --rm redirect php vendor/bin/phpunit --coverage-text

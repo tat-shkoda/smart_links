@@ -1,0 +1,45 @@
+
+services:
+  admin:
+    build: .
+    working_dir: /var/www
+    command: php -S 0.0.0.0:8080 -t public
+    environment:
+      docker: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./admin/:/var/www
+      - "./etc/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+
+  composer:
+    image: composer:2.9
+    volumes:
+      - .:/app
+
+  redirect:
+    build: .
+    working_dir: /var/www
+    command: php -S 0.0.0.0:8080 -t public
+    environment:
+      docker: "true"
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./redirect/:/var/www
+      - "./etc/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini:ro"
+    depends_on:
+      - admin
+      - memcached
+
+  memcached:
+    image: memcached:1.6-alpine
+    ports:
+      - "11211:11211"
